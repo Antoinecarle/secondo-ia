@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secondo.IA — Analyse de Faisabilité</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3348;
+      --text: #e8eaf0;
+      --muted: #8890a8;
+      --green: #22c55e;
+      --green-bg: #0d2818;
+      --green-border: #166534;
+      --yellow: #eab308;
+      --yellow-bg: #1c1a00;
+      --yellow-border: #713f12;
+      --red: #ef4444;
+      --red-bg: #1a0a0a;
+      --red-border: #7f1d1d;
+      --blue: #60a5fa;
+      --blue-bg: #0d1526;
+      --blue-border: #1e3a5f;
+      --accent: #7c3aed;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      line-height: 1.7;
+    }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #0f1117 0%, #1a0d2e 50%, #0d1a2e 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 60px 40px 50px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(124,58,237,0.15);
+      border: 1px solid rgba(124,58,237,0.3);
+      color: #a78bfa;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: 42px;
+      font-weight: 800;
+      letter-spacing: -1px;
+      background: linear-gradient(135deg, #fff 0%, #a78bfa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+    .hero p {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 600px;
+      margin: 0 auto 30px;
+    }
+    .hero-meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .meta-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .meta-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    /* SUMMARY STRIP */
+    .summary-strip {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .summary-stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+    .stat-number {
+      font-size: 28px;
+      font-weight: 800;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .stat-green { color: var(--green); }
+    .stat-yellow { color: var(--yellow); }
+    .stat-red { color: var(--red); }
+
+    /* MAIN */
+    .main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 50px 24px 80px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* CARDS */
+    .feature-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .feature-card:hover { border-color: #3e4566; }
+
+    .card-header {
+      padding: 24px 28px 20px;
+      display: flex;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .card-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--muted);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .card-title-block { flex: 1; }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+    .card-desc {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .status-badge {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .badge-green {
+      background: var(--green-bg);
+      border: 1px solid var(--green-border);
+      color: var(--green);
+    }
+    .badge-yellow {
+      background: var(--yellow-bg);
+      border: 1px solid var(--yellow-border);
+      color: var(--yellow);
+    }
+    .badge-red {
+      background: var(--red-bg);
+      border: 1px solid var(--red-border);
+      color: var(--red);
+    }
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    .card-body {
+      padding: 0 28px 24px;
+    }
+
+    .complexity-bar {
+      margin-bottom: 20px;
+    }
+    .complexity-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .bar-track {
+      height: 6px;
+      background: var(--surface2);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.5s ease;
+    }
+    .bar-low { background: var(--green); width: 20%; }
+    .bar-medium-low { background: #84cc16; width: 40%; }
+    .bar-medium { background: var(--yellow); width: 55%; }
+    .bar-medium-high { background: #f97316; width: 70%; }
+    .bar-high { background: var(--red); width: 90%; }
+
+    .analysis-block {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+    }
+    .analysis-block h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 10px;
+    }
+    .analysis-block p {
+      font-size: 14px;
+      color: #ccd0e0;
+      line-height: 1.65;
+    }
+
+    .pills-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .pill-green { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+    .pill-yellow { background: var(--yellow-bg); border: 1px solid var(--yellow-border); color: var(--yellow); }
+    .pill-red { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); }
+    .pill-blue { background: var(--blue-bg); border: 1px solid var(--blue-border); color: var(--blue); }
+    .pill-gray { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    .verdict-box {
+      border-radius: 12px;
+      padding: 16px 20px;
+      border-left: 3px solid;
+    }
+    .verdict-green { background: var(--green-bg); border-color: var(--green); }
+    .verdict-yellow { background: var(--yellow-bg); border-color: var(--yellow); }
+    .verdict-red { background: var(--red-bg); border-color: var(--red); }
+
+    .verdict-box strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 5px;
+    }
+    .verdict-green strong { color: var(--green); }
+    .verdict-yellow strong { color: var(--yellow); }
+    .verdict-red strong { color: var(--red); }
+    .verdict-box p {
+      font-size: 14px;
+      color: #ccd0e0;
+      line-height: 1.6;
+    }
+
+    /* PLATFORM TABLE */
+    .platform-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+    .platform-table th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid var(--border);
+    }
+    .platform-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(46,51,72,0.5);
+      vertical-align: middle;
+      color: #ccd0e0;
+    }
+    .platform-table tr:last-child td { border-bottom: none; }
+
+    /* GLOBAL SUMMARY */
+    .global-summary {
+      background: linear-gradient(135deg, rgba(124,58,237,0.08) 0%, rgba(30,58,95,0.12) 100%);
+      border: 1px solid rgba(124,58,237,0.25);
+      border-radius: 20px;
+      padding: 36px;
+      margin-top: 50px;
+    }
+    .global-summary h2 {
+      font-size: 22px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .global-summary p {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 28px;
+    }
+    .recommendation-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 700px) {
+      .recommendation-grid { grid-template-columns: 1fr; }
+    }
+    .rec-card {
+      background: var(--surface);
+      border-radius: 12px;
+      padding: 18px;
+      border: 1px solid var(--border);
+    }
+    .rec-card h4 {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 12px;
+    }
+    .rec-card ul {
+      list-style: none;
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .rec-card ul li {
+      padding: 4px 0;
+      display: flex;
+      gap: 8px;
+    }
+    .rec-card ul li::before { flex-shrink: 0; }
+    .rec-green h4 { color: var(--green); }
+    .rec-yellow h4 { color: var(--yellow); }
+    .rec-red h4 { color: var(--red); }
+
+    /* FOOTER */
+    .footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .footer strong { color: var(--text); }
+
+    /* RESPONSIVE */
+    @media (max-width: 640px) {
+      .hero { padding: 40px 20px 30px; }
+      .hero h1 { font-size: 28px; }
+      .summary-strip { padding: 16px 20px; gap: 20px; }
+      .main { padding: 30px 16px 60px; }
+      .card-header { flex-direction: column; gap: 12px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📋 Analyse de faisabilité</div>
+  <h1>Secondo.IA</h1>
+  <p>Étude de faisabilité des 8 fonctionnalités clés — ce qui est possible, difficile, ou bloquant, expliqué sans jargon technique.</p>
+  <div class="hero-meta">
+    <div class="meta-item">
+      <div class="meta-dot" style="background:#22c55e"></div>
+      <span>Mars 2026</span>
+    </div>
+    <div class="meta-item">
+      <div class="meta-dot" style="background:#7c3aed"></div>
+      <span>8 fonctionnalités analysées</span>
+    </div>
+    <div class="meta-item">
+      <div class="meta-dot" style="background:#60a5fa"></div>
+      <span>Recherches de marché incluses</span>
+    </div>
+  </div>
+</div>
+
+<!-- SUMMARY STRIP -->
+<div class="summary-strip">
+  <div class="summary-stat">
+    <span class="stat-number stat-green">5</span>
+    <span class="stat-label">Réalisables</span>
+  </div>
+  <div class="summary-stat">
+    <span class="stat-number stat-yellow">2</span>
+    <span class="stat-label">Sous conditions</span>
+  </div>
+  <div class="summary-stat">
+    <span class="stat-number stat-red">1</span>
+    <span class="stat-label">Risquée</span>
+  </div>
+  <div class="summary-stat">
+    <span class="stat-number" style="color:#a78bfa">8</span>
+    <span class="stat-label">Total analysées</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="section-title">Analyse détaillée par fonctionnalité</div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 1 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">1</div>
+      <div class="card-title-block">
+        <div class="card-title">📸 Optimisation photo par IA</div>
+        <div class="card-desc">Photo prise avec le téléphone → fond blanc automatique, recadrage, correction de lumière.</div>
+      </div>
+      <div class="status-badge badge-green"><div class="badge-dot"></div>Faisable</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Faible</span></div>
+        <div class="bar-track"><div class="bar-fill bar-low"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>L'utilisateur prend une photo avec son téléphone. L'app envoie l'image à un service IA (en ligne) qui supprime automatiquement l'arrière-plan, place un fond blanc, et corrige la lumière. La photo améliorée revient en quelques secondes dans l'app.</p>
+      </div>
+      <div class="analysis-block">
+        <h4>Les solutions existantes</h4>
+        <p>Ce marché est très mature. <strong>PhotoRoom</strong> est le leader mondial sur ce segment et a déjà intégré son service avec <strong>Label Emmaüs</strong>, résultant en +56% de taux de conversion. Les résultats sont prouvés sur des produits de seconde main.</p>
+        <div class="pills-row">
+          <span class="pill pill-green">✓ PhotoRoom — $0.02/photo</span>
+          <span class="pill pill-green">✓ Remove.bg — $9/mois</span>
+          <span class="pill pill-green">✓ Cloudinary — inclus plan</span>
+          <span class="pill pill-blue">📊 Label Emmaüs utilise déjà ça</span>
+        </div>
+      </div>
+      <div class="verdict-box verdict-green">
+        <strong>Verdict — À faire en priorité</strong>
+        <p>Technologie disponible, prouvée, prix raisonnables. À environ 0,02€ par photo, ça revient à <strong>20€ pour 1 000 photos</strong>. Pour une association qui vend 200 articles par mois, le coût est négligeable (4€/mois). C'est l'une des fonctionnalités les plus simples à mettre en œuvre et avec le plus grand impact sur les ventes.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 2 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">2</div>
+      <div class="card-title-block">
+        <div class="card-title">✍️ Génération de description par IA</div>
+        <div class="card-desc">Titre + description rapide (écrite ou dictée vocalement) → fiche produit complète et professionnelle.</div>
+      </div>
+      <div class="status-badge badge-green"><div class="badge-dot"></div>Faisable</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Très faible</span></div>
+        <div class="bar-track"><div class="bar-fill bar-low"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>L'utilisateur tape (ou dicte à voix haute) quelques mots clés comme "vélo homme 26 pouces rouge, bon état". L'IA génère immédiatement une description commerciale complète : état, caractéristiques, points forts, format adapté à chaque plateforme.</p>
+      </div>
+      <div class="analysis-block">
+        <h4>Pourquoi c'est simple</h4>
+        <p>Les grands modèles d'IA (Claude, GPT) excellent dans cet exercice. Il suffit de leur donner quelques informations et de définir le ton souhaité. La dictée vocale est déjà une fonctionnalité native sur iPhone et Android — l'app n'a pas besoin de la recréer. Des milliers d'apps e-commerce font déjà ça.</p>
+        <div class="pills-row">
+          <span class="pill pill-green">✓ Claude (Anthropic)</span>
+          <span class="pill pill-green">✓ GPT (OpenAI)</span>
+          <span class="pill pill-green">✓ Dictée vocale native</span>
+          <span class="pill pill-blue">💬 ~0.001€ par description</span>
+        </div>
+      </div>
+      <div class="verdict-box verdict-green">
+        <strong>Verdict — À faire en priorité</strong>
+        <p>C'est probablement la fonctionnalité la moins coûteuse et la plus rapide à implémenter. Coût réel : moins de 0,001€ par description générée. Pour 500 fiches par mois, c'est 0,50€. Un avantage énorme pour les associations dont les bénévoles ne savent pas toujours bien rédiger des annonces commerciales.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 3 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">3</div>
+      <div class="card-title-block">
+        <div class="card-title">⚖️ Estimation du poids et du prix</div>
+        <div class="card-desc">L'IA propose un poids et un prix suggéré selon la catégorie et la description. L'utilisateur peut ajuster.</div>
+      </div>
+      <div class="status-badge badge-green"><div class="badge-dot"></div>Faisable</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Moyenne</span></div>
+        <div class="bar-track"><div class="bar-fill bar-medium-low"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>Après avoir décrit l'article (catégorie + état + description), l'app affiche un prix suggéré et une fourchette de poids estimé. L'utilisateur peut modifier ces valeurs avant publication. Plus l'app est utilisée, plus les suggestions s'améliorent.</p>
+      </div>
+      <div class="analysis-block">
+        <h4>Comment ça fonctionne</h4>
+        <p>Deux approches combinables : <strong>(1)</strong> Utiliser une IA générative qui connaît déjà les prix du marché (un vélo de ville d'occasion, ça se vend entre 80 et 200€). <strong>(2)</strong> Avec le temps, l'app apprend des ventes réelles de la structure pour affiner ses estimations. La précision du poids est importante pour calculer les frais d'envoi.</p>
+        <div class="pills-row">
+          <span class="pill pill-green">✓ IA générative pour démarrer</span>
+          <span class="pill pill-blue">📈 S'améliore avec les données</span>
+          <span class="pill pill-yellow">⚠ Précision variable au début</span>
+        </div>
+      </div>
+      <div class="verdict-box verdict-green">
+        <strong>Verdict — Faisable avec nuance</strong>
+        <p>Faisable dès le départ avec une IA générative qui donne des estimations "raisonnables". Ces estimations ne seront pas parfaites au début (ex: un vélo électrique versus un vélo enfant), mais s'améliorent en intégrant un historique de prix. Le fait que l'utilisateur peut toujours <strong>corriger manuellement</strong> rend la fonctionnalité utilisable même imparfaite.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 4 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">4</div>
+      <div class="card-title-block">
+        <div class="card-title">🚀 Publication multi-plateformes</div>
+        <div class="card-desc">Un bouton publie sur LeBonCoin, Vinted, Label Emmaüs, Secondo.bike, Dolibarr, TF Shop simultanément.</div>
+      </div>
+      <div class="status-badge badge-yellow"><div class="badge-dot"></div>Sous conditions</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Élevée</span></div>
+        <div class="bar-track"><div class="bar-fill bar-medium-high"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>L'app doit "parler" à chaque plateforme dans son propre langage. Certaines ont des portes d'accès officielles (des API), d'autres non. Chaque plateforme a ses propres règles, champs obligatoires, catégories, et conditions de compte.</p>
+      </div>
+
+      <table class="platform-table">
+        <thead>
+          <tr>
+            <th>Plateforme</th>
+            <th>Statut</th>
+            <th>Détail</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Vinted Pro</strong></td>
+            <td><span class="pill pill-yellow" style="font-size:11px">⚠ API officielle, liste blanche</span></td>
+            <td style="font-size:13px;color:var(--muted)">API REST documentée. Nécessite une demande d'admission, un compte Pro (SIRET), et validation par Vinted. 500 articles actifs au démarrage. Délai estimé : 4 à 8 semaines.</td>
+          </tr>
+          <tr>
+            <td><strong>Label Emmaüs</strong></td>
+            <td><span class="pill pill-green" style="font-size:11px">✓ Intégration via IZBERG</span></td>
+            <td style="font-size:13px;color:var(--muted)">Plateforme construite sur IZBERG (API-first). Déjà intégré avec des vendeurs ayant leur propre SI. Structures ESS éligibles. Contact direct recommandé.</td>
+          </tr>
+          <tr>
+            <td><strong>Dolibarr ERP</strong></td>
+            <td><span class="pill pill-green" style="font-size:11px">✓ API REST complète</span></td>
+            <td style="font-size:13px;color:var(--muted)">API REST officielle et documentée (CRUD complet). Aucun accord préalable nécessaire. La meilleure intégration ERP du cahier des charges.</td>
+          </tr>
+          <tr style="background:rgba(239,68,68,0.04);">
+            <td><strong>LeBonCoin</strong></td>
+            <td><span class="pill pill-red" style="font-size:11px">✗ Pas d'API publique</span></td>
+            <td style="font-size:13px;color:var(--muted)">Aucun accès officiel pour les tiers. DataDome anti-bot actif. Précédent judiciaire : <strong>50 000€ de condamnation</strong> pour scraping non autorisé (2022). → Voir solution AllYouCanPost ci-dessous.</td>
+          </tr>
+          <tr>
+            <td><strong>TF Shop / Facile Caisse</strong></td>
+            <td><span class="pill pill-gray" style="font-size:11px">? Pas d'API documentée</span></td>
+            <td style="font-size:13px;color:var(--muted)">Logiciel caisse Windows. Aucune API publique. Alternative : <strong>CycleSoftware</strong> (leader ERP vélo en France) avec API documentée (stock, e-commerce, webhooks).</td>
+          </tr>
+          <tr>
+            <td><strong>Secondo.bike</strong></td>
+            <td><span class="pill pill-blue" style="font-size:11px">→ Contact direct</span></td>
+            <td style="font-size:13px;color:var(--muted)">Petite marketplace vélo (Toulouse). Aucune API publique. Probablement import CSV/XML à négocier directement avec eux.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="divider"></div>
+
+      <!-- ALLYOUCANPOST FOCUS BLOCK -->
+      <div style="background:rgba(234,179,8,0.06);border:1px solid rgba(234,179,8,0.2);border-radius:14px;padding:22px;margin-bottom:16px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:18px;">🔍</span>
+          <h4 style="font-size:14px;font-weight:800;color:#fbbf24;margin:0;">Focus — LeBonCoin : la solution AllYouCanPost</h4>
+          <span class="pill pill-yellow" style="font-size:11px;margin-left:auto;">Zone grise — à valider</span>
+        </div>
+
+        <p style="font-size:14px;color:#ccd0e0;line-height:1.65;margin-bottom:16px;">
+          <strong style="color:#fbbf24;">AllYouCanPost</strong> est un service français de multi-diffusion d'annonces. Il propose une <strong>API REST</strong> permettant à une app tierce d'envoyer une annonce une seule fois, et de la distribuer automatiquement sur LeBonCoin, Paruvendu, La Centrale et d'autres portails. Voici comment ça fonctionnerait dans Secondo.IA :
+        </p>
+
+        <div style="background:var(--surface);border-radius:10px;padding:16px;margin-bottom:16px;font-family:monospace;font-size:12px;color:#a78bfa;border:1px solid var(--border);">
+          Secondo.IA → API AllYouCanPost → LeBonCoin + Paruvendu + autres portails
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+          <div style="background:var(--surface);border-radius:10px;padding:14px;border:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Ce qui est positif</div>
+            <ul style="list-style:none;font-size:13px;color:#ccd0e0;">
+              <li style="padding:3px 0;">→ API disponible dès le plan Premium (dès ~40€/mois)</li>
+              <li style="padding:3px 0;">→ Documentation fournie sur demande</li>
+              <li style="padding:3px 0;">→ Retour des URLs de publication + rapports</li>
+              <li style="padding:3px 0;">→ Essai gratuit 1 mois</li>
+              <li style="padding:3px 0;">→ AllYouCanPost absorbe la relation directe avec LeBonCoin</li>
+            </ul>
+          </div>
+          <div style="background:var(--surface);border-radius:10px;padding:14px;border:1px solid var(--border);">
+            <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:8px;">Les risques à connaître</div>
+            <ul style="list-style:none;font-size:13px;color:#ccd0e0;">
+              <li style="padding:3px 0;">⚠ LeBonCoin interdit l'automatisation dans ses CGU</li>
+              <li style="padding:3px 0;">⚠ AllYouCanPost n'est <em>probablement pas</em> partenaire officiel (pas de preuve publique)</li>
+              <li style="padding:3px 0;">⚠ Fonctionne via de l'automatisation de compte — risque de blocage</li>
+              <li style="padding:3px 0;">⚠ Ne couvre pas Vinted</li>
+              <li style="padding:3px 0;">⚠ Vrai partenaire officiel LeBonCoin : Ubiflow (immo/auto seulement)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);border-radius:10px;padding:14px;">
+          <strong style="display:block;font-size:12px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:6px;">⚠ Action requise avant de construire dessus</strong>
+          <p style="font-size:13px;color:#ccd0e0;margin:0;line-height:1.6;">Avant d'intégrer AllYouCanPost dans Secondo.IA, il faut leur demander <strong>par écrit</strong> : "Avez-vous un accord signé avec LeBonCoin autorisant la publication automatisée ?" Si oui, demander à le voir. Sans confirmation écrite, le risque opérationnel (blocage de comptes clients) reste réel. La solution existe, mais elle n'est <strong>pas validable techniquement sans ce point de vérification commercial</strong>.</p>
+        </div>
+      </div>
+
+      <div class="verdict-box verdict-yellow">
+        <strong>Verdict — Faisable partiellement, avec une feuille de route claire</strong>
+        <p><strong>Intégrations directes (sans risque) :</strong> Vinted Pro, Label Emmaüs (IZBERG), Dolibarr. <strong>LeBonCoin via AllYouCanPost :</strong> solution à explorer, fonctionnelle, mais à valider contractuellement avant de construire dessus. <strong>CycleSoftware</strong> comme alternative à TF Shop si les structures vélo l'utilisent. <strong>Secondo.bike :</strong> contact direct à prévoir.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 5 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">5</div>
+      <div class="card-title-block">
+        <div class="card-title">💬 Messagerie unifiée</div>
+        <div class="card-desc">Tous les messages de toutes les plateformes dans une seule boîte de réception.</div>
+      </div>
+      <div class="status-badge badge-red"><div class="badge-dot"></div>Risquée</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Très élevée</span></div>
+        <div class="bar-track"><div class="bar-fill bar-high"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>L'app doit accéder aux messages privés de l'utilisateur sur LeBonCoin et Vinted. Pour ça, il faut soit que ces plateformes donnent accès officiellement (via une API dédiée), soit trouver des moyens détournés.</p>
+      </div>
+      <div class="analysis-block">
+        <h4>La réalité du marché</h4>
+        <p><strong>LeBonCoin</strong> ne propose pas d'accès à sa messagerie via API. La plateforme est protégée par un système anti-automatisation (DataDome) que même les développeurs les plus avancés peinent à contourner durablement. <strong>Vinted</strong> idem : pas d'API pour les messages. Il existe une app française appelée <em>Ventu.fr</em> qui prétend faire ça, mais son fonctionnement repose probablement sur des méthodes qui violent les conditions d'utilisation des plateformes — avec le risque de voir les comptes suspendus.</p>
+        <div class="pills-row">
+          <span class="pill pill-red">✗ LeBonCoin — Messagerie inaccessible</span>
+          <span class="pill pill-red">✗ Vinted — Pas d'API messages</span>
+          <span class="pill pill-yellow">⚠ Risque de suspension des comptes</span>
+        </div>
+      </div>
+      <div class="verdict-box verdict-red">
+        <strong>Verdict — À reconsidérer</strong>
+        <p>Cette fonctionnalité telle que décrite est la plus risquée de tout le cahier des charges. Les plateformes majeures (LeBonCoin, Vinted) <strong>n'ouvrent pas leur messagerie</strong> aux apps tierces. Les solutions qui contournent ça peuvent fonctionner temporairement mais s'exposent à des blocages ou suspensions de comptes. <strong>Recommandation :</strong> pour les plateformes qui ont une API (Vinted Pro, Label Emmaüs), intégrer les messages. Pour LeBonCoin, se limiter à des notifications "Vous avez un nouveau message sur LeBonCoin" qui redirigent vers l'app en question. C'est moins parfait mais c'est stable et sans risque légal.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 6 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">6</div>
+      <div class="card-title-block">
+        <div class="card-title">📦 Gestion des expéditions</div>
+        <div class="card-desc">Générer les étiquettes d'envoi et tracker les colis directement depuis l'app.</div>
+      </div>
+      <div class="status-badge badge-green"><div class="badge-dot"></div>Faisable</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Moyenne</span></div>
+        <div class="bar-track"><div class="bar-fill bar-medium"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>Quand un article est vendu, l'utilisateur ouvre l'app, renseigne l'adresse du client (récupérée depuis la vente), et l'app génère une étiquette d'envoi à imprimer. Le numéro de suivi est automatiquement enregistré et l'acheteur peut suivre son colis.</p>
+      </div>
+      <div class="analysis-block">
+        <h4>Les options disponibles en France</h4>
+        <p>La solution recommandée est <strong>Sendcloud</strong> : une plateforme qui connecte à plus de 25 transporteurs français (Colissimo, Mondial Relay, DHL, Chronopost...) via une seule intégration. L'API Colissimo (La Poste) est également disponible directement mais nécessite un contrat Colissimo Entreprise. Pour une association, Sendcloud est plus flexible.</p>
+        <div class="pills-row">
+          <span class="pill pill-green">✓ Sendcloud — Multi-transporteurs</span>
+          <span class="pill pill-green">✓ Colissimo — API La Poste</span>
+          <span class="pill pill-green">✓ Mondial Relay</span>
+          <span class="pill pill-blue">🖨 Impression étiquette PDF</span>
+        </div>
+      </div>
+      <div class="verdict-box verdict-green">
+        <strong>Verdict — Faisable, bien encadré</strong>
+        <p>Il existe plusieurs services matures dédiés à ça. La principale contrainte est que l'association devra <strong>ouvrir un compte chez le transporteur choisi</strong> (Colissimo Entreprise ou Sendcloud). Ce n'est pas bloquant mais c'est une démarche administrative à prévoir. L'étiquette générée s'imprime normalement depuis l'app sur une imprimante ordinaire.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 7 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">7</div>
+      <div class="card-title-block">
+        <div class="card-title">📊 Bilans & rapports</div>
+        <div class="card-desc">Tableaux de bord : tonnes de produits réemployés, revenus, statistiques pour les financeurs.</div>
+      </div>
+      <div class="status-badge badge-green"><div class="badge-dot"></div>Faisable</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Faible à Moyenne</span></div>
+        <div class="bar-track"><div class="bar-fill bar-medium-low"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>Un écran dans l'app affiche : nombre d'articles vendus ce mois, revenus générés, poids total de produits réemployés (évitant la déchetterie), répartition par catégorie. Les associations peuvent exporter ces données en PDF pour leurs rapports annuels et dossiers de financement.</p>
+      </div>
+      <div class="analysis-block">
+        <h4>Pourquoi c'est simple</h4>
+        <p>C'est de la présentation de données que l'app enregistre déjà elle-même (les ventes, les articles, les poids estimés). Pas de dépendance à des services externes. C'est l'une des fonctionnalités les plus <strong>autonomes</strong> techniquement — tout repose sur les données internes de Secondo.IA.</p>
+        <div class="pills-row">
+          <span class="pill pill-green">✓ 100% données internes</span>
+          <span class="pill pill-green">✓ Export PDF / Excel</span>
+          <span class="pill pill-blue">♻️ Calcul tonnes réemployées</span>
+          <span class="pill pill-blue">📈 Visualisation graphique</span>
+        </div>
+      </div>
+      <div class="verdict-box verdict-green">
+        <strong>Verdict — À faire en priorité (valeur associative forte)</strong>
+        <p>Fonctionnalité stratégique pour les associations : elles ont besoin de <strong>prouver leur impact</strong> à leurs financeurs (subventions, ADEME, collectivités). Une app qui dit "vous avez réemployé 4,2 tonnes de vélos ce trimestre" a une valeur différenciante énorme. Techniquement simple car toutes les données viennent de l'app elle-même.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- FEATURE 8 -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="feature-card">
+    <div class="card-header">
+      <div class="card-number">8</div>
+      <div class="card-title-block">
+        <div class="card-title">👥 Gestion d'équipe</div>
+        <div class="card-desc">Créer des équipes avec différents rôles : bénévoles, salariés, administrateurs.</div>
+      </div>
+      <div class="status-badge badge-green"><div class="badge-dot"></div>Faisable</div>
+    </div>
+    <div class="card-body">
+      <div class="complexity-bar">
+        <div class="complexity-label"><span>Complexité</span><span>Faible</span></div>
+        <div class="bar-track"><div class="bar-fill bar-low"></div></div>
+      </div>
+      <div class="analysis-block">
+        <h4>Ce que ça implique concrètement</h4>
+        <p>L'administrateur de l'association crée des comptes pour ses bénévoles et salariés. Chaque rôle a des droits différents : un bénévole peut créer des articles et les vendre, un manager peut voir les bilans, l'admin peut tout gérer. L'objectif est de permettre à plusieurs personnes de travailler sur la même "boutique" en même temps.</p>
+      </div>
+      <div class="analysis-block">
+        <h4>Pourquoi c'est simple</h4>
+        <p>C'est un besoin extrêmement courant dans toutes les apps professionnelles. Les patterns (comment gérer ça techniquement) sont parfaitement maîtrisés. Notion, Slack, Trello, et des milliers d'autres apps font ça. Il n'y a aucune dépendance à des services externes.</p>
+        <div class="pills-row">
+          <span class="pill pill-green">✓ Bénévole (créer/vendre)</span>
+          <span class="pill pill-green">✓ Manager (voir bilans)</span>
+          <span class="pill pill-green">✓ Admin (tout gérer)</span>
+          <span class="pill pill-blue">📧 Invitation par email</span>
+        </div>
+      </div>
+      <div class="verdict-box verdict-green">
+        <strong>Verdict — Fondation essentielle</strong>
+        <p>C'est une fonctionnalité de base qui doit être intégrée dès le début. Elle est simple à réaliser et ne présente aucun obstacle. C'est la base qui permet à l'app d'être utilisée comme un <strong>vrai outil de travail collectif</strong> plutôt qu'une app individuelle. Sans elle, une structure avec 5 bénévoles ne peut pas vraiment l'adopter.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─────────────────────────────────────────── -->
+  <!-- GLOBAL SUMMARY -->
+  <!-- ─────────────────────────────────────────── -->
+  <div class="global-summary">
+    <h2>🗺️ Synthèse & recommandations</h2>
+    <p>Sur les 8 fonctionnalités du cahier des charges, voici comment prioriser le développement.</p>
+
+    <div class="recommendation-grid">
+      <div class="rec-card rec-green">
+        <h4>✅ Phase 1 — Lancer vite</h4>
+        <ul>
+          <li><span style="color:var(--green)">→</span> Photo IA (fond blanc)</li>
+          <li><span style="color:var(--green)">→</span> Description IA</li>
+          <li><span style="color:var(--green)">→</span> Gestion d'équipe</li>
+          <li><span style="color:var(--green)">→</span> Bilans & rapports</li>
+        </ul>
+      </div>
+      <div class="rec-card rec-yellow">
+        <h4>⚠️ Phase 2 — Avec préparation</h4>
+        <ul>
+          <li><span style="color:var(--yellow)">→</span> Publication Vinted + Label Emmaüs + Dolibarr</li>
+          <li><span style="color:var(--yellow)">→</span> Estimation prix / poids</li>
+          <li><span style="color:var(--yellow)">→</span> Gestion expéditions (Sendcloud)</li>
+        </ul>
+      </div>
+      <div class="rec-card rec-red">
+        <h4>⛔ Phase 3 — À repenser</h4>
+        <ul>
+          <li><span style="color:var(--red)">→</span> Messagerie unifiée LeBonCoin</li>
+          <li style="font-size:12px;color:var(--muted)">Remplacer par : notifications + redirection</li>
+          <li><span style="color:var(--red)">→</span> LeBonCoin auto-publication</li>
+          <li style="font-size:12px;color:var(--muted)">Remplacer par : "publication assistée"</li>
+        </ul>
+      </div>
+    </div>
+
+    <div style="margin-top:28px;padding:20px;background:var(--surface);border-radius:12px;border:1px solid var(--border);">
+      <h4 style="font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Note sur LeBonCoin</h4>
+      <p style="font-size:14px;color:#ccd0e0;line-height:1.65;">LeBonCoin est la plateforme avec le plus grand volume de France mais c'est aussi celle qui <strong>résiste le plus aux intégrations tierces</strong>. C'est un choix délibéré de leur part pour garder le contrôle de leur trafic. Plutôt que d'y voir un blocage, c'est l'occasion de positionner Secondo.IA comme <em>"l'app qui prépare tout, et qui vous fait publier sur LeBonCoin en 30 secondes"</em> — ce qui reste un gain de temps énorme comparé à repartir de zéro à chaque fois.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="footer">
+  <strong>Secondo.IA</strong> — Analyse de faisabilité — Mars 2026<br>
+  Document préparé dans le cadre du développement de la plateforme Secondo.IA pour les structures de réemploi.
+</div>
+
+</body>
+</html>
